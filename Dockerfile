@@ -41,7 +41,7 @@ COPY --from=build --chown=node:node /app/packages/db ./packages/db
 USER node
 
 FROM runtime AS api
-ARG GIT_SHA=unknown
+ARG GIT_SHA=
 ENV GIT_SHA=${GIT_SHA} PORT=8080 WEB_DIST_DIR=/app/apps/web/dist
 COPY --from=build --chown=node:node /app/apps/api/dist ./apps/api/dist
 COPY --from=build --chown=node:node /app/apps/web/dist ./apps/web/dist
@@ -51,7 +51,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
 CMD ["node", "--enable-source-maps", "apps/api/dist/server.js"]
 
 FROM runtime AS worker
-ARG GIT_SHA=unknown
+ARG GIT_SHA=
 ENV GIT_SHA=${GIT_SHA}
 COPY --from=build --chown=node:node /app/apps/worker/dist ./apps/worker/dist
 CMD ["node", "--enable-source-maps", "apps/worker/dist/main.js"]

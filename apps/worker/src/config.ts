@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { parseEnv } from '@deadletter/shared';
+import { parseEnv, withBuildVersion } from '@deadletter/shared';
 
 export const workerEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -20,4 +20,4 @@ export const workerEnvSchema = z.object({
 export type WorkerConfig = z.output<typeof workerEnvSchema>;
 
 export const loadWorkerConfig = (source: Record<string, string | undefined> = process.env): WorkerConfig =>
-  parseEnv(workerEnvSchema, source);
+  parseEnv(workerEnvSchema, withBuildVersion(source));

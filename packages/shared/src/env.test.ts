@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { EnvValidationError, parseEnv } from './env';
+import { EnvValidationError, parseEnv, withBuildVersion } from './env';
 
 const schema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(4000),
@@ -32,5 +32,21 @@ describe('parseEnv', () => {
       );
       expect(err.message).not.toContain(secret);
     }
+  });
+});
+
+describe('withBuildVersion', () => {
+  it('prefers an explicit GIT_SHA', () => {
+    expect(withBuildVersion({ GIT_SHA: 'abc123', RENDER_GIT_COMMIT: 'def456' }).GIT_SHA).toBe('abc123');
+  });
+
+  it('falls back to the platform commit when GIT_SHA is unset, empty or "unknown"', () => {
+    expect(withBuildVersion({ RENDER_GIT_COMMIT: 'def456' }).GIT_SHA).toBe('def456');
+    expect(withBuildVersion({ GIT_SHA: '', RENDER_GIT_COMMIT: 'def456' }).GIT_SHA).toBe('def456');
+    expect(withBuildVersion({ GIT_SHA: 'unknown', RENDER_GIT_COMMIT: 'def456' }).GIT_SHA).toBe('def456');
+  });
+
+  it('leaves GIT_SHA unset when neither is known, so the schema default applies', () => {
+    expect(withBuildVersion({}).GIT_SHA).toBeUndefined();
   });
 });

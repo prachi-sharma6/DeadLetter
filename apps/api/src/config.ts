@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { parseEnv } from '@deadletter/shared';
+import { parseEnv, withBuildVersion } from '@deadletter/shared';
 
 const bool = z.enum(['true', 'false']).transform((v) => v === 'true');
 
@@ -29,4 +29,4 @@ export const apiEnvSchema = z.object({
 export type ApiConfig = z.output<typeof apiEnvSchema>;
 
 export const loadApiConfig = (source: Record<string, string | undefined> = process.env): ApiConfig =>
-  parseEnv(apiEnvSchema, source);
+  parseEnv(apiEnvSchema, withBuildVersion(source));
