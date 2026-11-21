@@ -1,6 +1,6 @@
 # DeadLetter: production plan
 
-Status: **approved**. Phases 0 and 1 done and deployed (https://deadletter.onrender.com); Phase 2 next.
+Status: **approved**. Phases 0–2 done and deployed (https://deadletter.onrender.com); Phase 3 next.
 Date: 2026-11-21. Free-tier facts below were checked on this date and change often; each phase that depends on one re-checks it.
 
 ---
