@@ -18,12 +18,15 @@ export const apiEnvSchema = z.object({
   APP_ORIGIN: z.url(),
   /**
    * How to find the client IP behind reverse proxies (used for rate limits, sessions and audit):
-   *  - `private`: trust only private/internal proxy addresses (10/8, 172.16/12, 192.168/16, loopback, link-local) and
-   *    take the right-most public address. Correct for hosts whose proxy chain is internal (Render), and a client
-   *    cannot spoof it: anything it puts in X-Forwarded-For ends up to the left of its real address.
+   *  - `cloudflare`: trust private/internal addresses and Cloudflare's edge ranges, take the right-most address that is
+   *    neither. Correct for Render (client → Cloudflare → Render 10.x → app), measured on the live service.
+   *  - `private`: trust only private/internal addresses (10/8, 172.16/12, 192.168/16, loopback, link-local).
    *  - a number: trust exactly that many proxy hops. 0 = use the socket address (no proxy).
+   * In every mode a client cannot spoof its IP: anything it sends in X-Forwarded-For lands left of its real address.
    */
-  TRUST_PROXY: z.union([z.literal('private'), z.coerce.number().int().min(0).max(5)]).default(0),
+  TRUST_PROXY: z
+    .union([z.literal('private'), z.literal('cloudflare'), z.coerce.number().int().min(0).max(5)])
+    .default(0),
   /** Directory of the built web app to serve; unset in development (Vite serves it). */
   WEB_DIST_DIR: z.string().optional(),
   /** Also run the background worker inside the API process (for single-service free hosts). */

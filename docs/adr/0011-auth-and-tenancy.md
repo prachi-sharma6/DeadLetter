@@ -34,6 +34,11 @@
   break of the access check makes 35 of these tests fail.
 - **Rate limits** are fixed windows in Redis shared by all instances, with a per-process fallback if Redis is
   unavailable: per IP globally, and tighter per IP and per account for sign-up, login, password reset and token use.
+- **Client IP** (sessions, audit, rate limits) comes from `X-Forwarded-For` trusting only known proxies. On Render the
+  measured chain is client → Cloudflare edge (public) → Render proxy (10.x); `TRUST_PROXY=cloudflare` trusts private
+  ranges plus Cloudflare's published ranges and takes the right-most remaining address, which a client cannot forge.
+  Trusting only private ranges would have picked Cloudflare's edge, and a hop count of 1 picked Render's proxy, making
+  every visitor share one rate-limit bucket (found by the live smoke test).
 - **API keys:** `dl_live_<12 hex>_<256-bit secret>`, shown once, stored as SHA-256 (fast hashing is appropriate for a
   random secret), compared in constant time, scoped, optionally expiring, revocable and rotatable.
 - **Data rights:** users can export their data and delete their account; deletion removes organizations where they are
