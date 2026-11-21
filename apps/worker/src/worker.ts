@@ -28,9 +28,10 @@ export interface RunningWorker {
 export async function startWorker({ db, redisUrl, logger, version }: WorkerDeps): Promise<RunningWorker> {
   const log = logger.child({ component: 'worker' });
   const workerId = `${os.hostname()}:${process.pid}`;
-  const redis = createRedis({ url: redisUrl, name: 'worker', logger: log, role: 'queue' });
+  // Check the database before opening any connection, so a failed (and retried) start never leaks Redis connections.
   await pingDb(db);
   await assertUtcSession(db);
+  const redis = createRedis({ url: redisUrl, name: 'worker', logger: log, role: 'queue' });
 
   const queue = new Queue(JOBS_QUEUE, { connection: redis, prefix: BULL_PREFIX });
   queue.on('error', (err) => log.warn({ err: err.message }, 'queue error'));

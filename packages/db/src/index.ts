@@ -35,15 +35,21 @@ export function createDb({ url, poolMax = 5, caCert }: DbOptions): PrismaClient 
  * time zone. A non-UTC session would silently store every instant shifted by its offset. The database default is set to
  * UTC by migration; this check makes the app refuse to start if that ever is not the case (docs/adr/0010).
  */
+export class NonUtcSessionError extends Error {
+  constructor(readonly timeZone: string) {
+    super(
+      `Database session time zone is "${timeZone}", expected UTC. Run migrations (they set the database default) ` +
+        "or set it with: ALTER DATABASE <name> SET timezone TO 'UTC'",
+    );
+    this.name = 'NonUtcSessionError';
+  }
+}
+
+/** Throws NonUtcSessionError on a misconfigured database; connection errors propagate unchanged. */
 export async function assertUtcSession(db: Db): Promise<void> {
   const [row] = await db.$queryRaw<{ tz: string }[]>`SELECT current_setting('TimeZone') AS tz`;
   const tz = row?.tz ?? 'unknown';
-  if (tz !== 'UTC' && tz !== 'Etc/UTC') {
-    throw new Error(
-      `Database session time zone is "${tz}", expected UTC. Run migrations (they set the database default) or set ` +
-        `the database default with: ALTER DATABASE <name> SET timezone TO 'UTC'`,
-    );
-  }
+  if (tz !== 'UTC' && tz !== 'Etc/UTC') throw new NonUtcSessionError(tz);
 }
 
 /** Accept PEMs pasted into single-line env var fields with literal `\n` sequences. */
