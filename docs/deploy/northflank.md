@@ -1,5 +1,8 @@
 # Deploying on free tiers (Northflank + Redis Cloud)
 
+> **Not the current setup.** Northflank requires a card for account verification. The current no-card deployment is
+> [render.md](render.md) ([ADR 0009](../adr/0009-no-card-hosting.md)). Use this guide only if a card becomes available.
+
 Runbook for the first deploy and for rebuilding the environment from scratch. Decision record: [ADR 0002](../adr/0002-hosting.md).
 
 **Golden rule for secrets:** paste connection strings and passwords **only into the Northflank UI** (secret group),

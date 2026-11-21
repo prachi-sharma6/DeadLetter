@@ -1,33 +1,20 @@
-import os from 'node:os';
-import { createDb, pingDb } from '@deadletter/db';
-import {
-  closeRedis,
-  createLogger,
-  createRedis,
-  installCrashHandlers,
-  installGracefulShutdown,
-} from '@deadletter/runtime';
+import { createDb } from '@deadletter/db';
+import { createLogger, installCrashHandlers, installGracefulShutdown } from '@deadletter/runtime';
 import { loadWorkerConfig } from './config';
-import { startHeartbeat } from './heartbeat';
+import { startWorker } from './worker';
 
-// Phase 0 skeleton: connects, heartbeats and shuts down cleanly. Job processing arrives in Phase 4.
+// Standalone worker process. See ./worker.ts for the worker itself.
 const config = loadWorkerConfig();
 const logger = createLogger({ service: 'worker', level: config.LOG_LEVEL, pretty: config.LOG_PRETTY });
 installCrashHandlers(logger);
 
-const workerId = `${os.hostname()}:${process.pid}`;
-const db = createDb({ url: config.DATABASE_URL, poolMax: config.DATABASE_POOL_MAX });
-const redis = createRedis({ url: config.REDIS_URL, name: 'worker', logger, role: 'queue' });
-
-await pingDb(db);
-const heartbeat = startHeartbeat({ redis, workerId, logger });
-logger.info({ workerId, version: config.GIT_SHA }, 'worker started');
+const db = createDb({ url: config.DATABASE_URL, poolMax: config.DATABASE_POOL_MAX, caCert: config.DATABASE_CA_CERT });
+const worker = await startWorker({ db, redisUrl: config.REDIS_URL, logger, version: config.GIT_SHA });
 
 installGracefulShutdown({
   logger,
   steps: [
-    { name: 'heartbeat', run: () => heartbeat.stop() },
-    { name: 'redis', run: () => closeRedis(redis) },
+    { name: 'worker', run: () => worker.stop() },
     { name: 'db', run: () => db.$disconnect() },
   ],
 });

@@ -75,6 +75,11 @@ Key design decisions:
 
 ## 4. Free deployment stack (recommended)
 
+> **Update 2026-11-21:** Northflank turned out to require a card for verification, and we have none. The current
+> deployment is **Render Free (API + web + in-process worker) + Supabase Free + Redis Cloud Free + cron-job.org**; see
+> [ADR 0009](docs/adr/0009-no-card-hosting.md) and [docs/deploy/render.md](docs/deploy/render.md). The table below is
+> the target once a card is available.
+
 | Need                  | Service                                                           | Free allowance (checked 2026-11-21)                                                            | Notes                                                                                              |
 | --------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | API + web (always on) | **Northflank Sandbox** service #1                                 | 2 always-on services, 2 jobs, 1 database, no card reported                                     | Built from a Dockerfile on GitHub push. No local Docker needed                                     |

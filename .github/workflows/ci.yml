@@ -69,6 +69,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build api image
         run: docker build --target api --build-arg GIT_SHA=${{ github.sha }} -t deadletter-api:ci .
+      - name: Build single-service image (default stage, used by Render)
+        run: docker build --build-arg GIT_SHA=${{ github.sha }} -t deadletter-all:ci .
       - name: Build worker image
         run: docker build --target worker --build-arg GIT_SHA=${{ github.sha }} -t deadletter-worker:ci .
       - name: Smoke-test api image (liveness without dependencies)

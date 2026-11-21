@@ -60,3 +60,8 @@ CMD ["node", "--enable-source-maps", "apps/worker/dist/main.js"]
 FROM runtime AS migrate
 WORKDIR /app/packages/db
 CMD ["npx", "prisma", "migrate", "deploy"]
+
+# Single-service image: API + web app + in-process worker (docs/adr/0009).
+# Keep this stage LAST: Render builds the final stage and has no option to choose a target.
+FROM api AS all
+ENV RUN_WORKER=true
