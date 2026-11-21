@@ -1,0 +1,14 @@
+{
+  "name": "@deadletter/runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Node.js runtime helpers shared by the API and worker: logging, Redis, graceful shutdown",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "ioredis": "5.11.1",
+    "pino": "9.14.0"
+  }
+}

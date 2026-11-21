@@ -1,0 +1,8 @@
+node_modules
+dist
+.tsbuild
+coverage
+package-lock.json
+_prototype
+packages/db/prisma/migrations
+packages/db/src/generated

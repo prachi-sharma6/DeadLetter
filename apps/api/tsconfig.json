@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src", "test", "tsup.config.ts"],
+  "references": [
+    { "path": "../../packages/shared" },
+    { "path": "../../packages/runtime" },
+    { "path": "../../packages/db" }
+  ]
+}

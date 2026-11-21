@@ -1,0 +1,24 @@
+# dependencies & build output
+node_modules/
+dist/
+.tsbuild/
+*.tsbuildinfo
+coverage/
+
+# env & secrets (only .env.example is committed)
+.env
+.env.*
+!.env.example
+
+# tooling
+.vite/
+playwright-report/
+test-results/
+*.log
+.DS_Store
+
+# legacy prototype kept locally for reference while porting (never committed)
+_prototype/
+
+# generated Prisma client (rebuilt by `npm run db:generate`)
+packages/db/src/generated/

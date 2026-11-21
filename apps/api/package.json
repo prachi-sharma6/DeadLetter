@@ -1,0 +1,27 @@
+{
+  "name": "@deadletter/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false --env-file-if-exists=../../.env src/server.ts",
+    "build": "tsup",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@deadletter/db": "0.1.0",
+    "@deadletter/runtime": "0.1.0",
+    "@deadletter/shared": "0.1.0",
+    "compression": "1.8.2",
+    "express": "5.3.0",
+    "helmet": "8.3.0",
+    "pino-http": "10.5.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/compression": "1.8.1",
+    "@types/express": "5.0.6",
+    "@types/supertest": "6.0.3",
+    "supertest": "7.3.2"
+  }
+}

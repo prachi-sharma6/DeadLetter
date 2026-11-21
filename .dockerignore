@@ -1,0 +1,12 @@
+node_modules
+**/node_modules
+**/dist
+**/.tsbuild
+coverage
+.git
+.env
+.env.*
+_prototype
+test-results
+playwright-report
+*.log
