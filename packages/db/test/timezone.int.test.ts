@@ -11,7 +11,7 @@ describe('timestamps', () => {
     const rows = await Promise.all(
       Array.from({ length: 3 }, () => db.$queryRaw<{ tz: string }[]>`SELECT current_setting('TimeZone') AS tz`),
     );
-    for (const [r] of rows) expect(r?.tz).toBe('UTC');
+    for (const [r] of rows) expect(['UTC', 'Etc/UTC']).toContain(r?.tz); // both names mean UTC
   });
 
   it('stores the exact instant and compares correctly with now()', async () => {
