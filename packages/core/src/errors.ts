@@ -14,6 +14,31 @@ export class DomainError extends Error {
   }
 }
 
+export class UnauthenticatedError extends DomainError {
+  constructor(message = 'Sign in to continue') {
+    super('UNAUTHENTICATED', 401, message);
+  }
+}
+
+/** Authenticated and a member, but the role is too low. Non-members get NotFoundError instead (no id probing). */
+export class ForbiddenError extends DomainError {
+  constructor(message: string) {
+    super('FORBIDDEN', 403, message);
+  }
+}
+
+export class BadRequestError extends DomainError {
+  constructor(code: string, message: string, details?: Record<string, unknown>) {
+    super(code, 400, message, details);
+  }
+}
+
+export class EmailNotVerifiedError extends DomainError {
+  constructor() {
+    super('EMAIL_NOT_VERIFIED', 403, 'Verify your email address first');
+  }
+}
+
 export class NotFoundError extends DomainError {
   constructor(what: string) {
     super('NOT_FOUND', 404, `${what} not found`);

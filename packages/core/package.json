@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@deadletter/db": "0.1.0",
-    "@deadletter/shared": "0.1.0"
+    "@deadletter/shared": "0.1.0",
+    "@node-rs/argon2": "2.2.2"
   }
 }

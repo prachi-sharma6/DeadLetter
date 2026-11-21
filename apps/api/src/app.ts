@@ -5,22 +5,15 @@ import express, { type ErrorRequestHandler, type Request, type RequestHandler } 
 import compression from 'compression';
 import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
-import { pingDb, type PrismaClient } from '@deadletter/db';
-import { WORKER_STALE_MS, WORKERS_KEY, withTimeout, type Logger, type Redis } from '@deadletter/runtime';
-import type { ApiConfig } from './config';
+import { pingDb } from '@deadletter/db';
+import { DomainError } from '@deadletter/core';
+import { WORKER_STALE_MS, WORKERS_KEY, withTimeout } from '@deadletter/runtime';
+import type { AppDeps } from './http/context';
+import { RateLimiter } from './http/rate-limit';
+import { buildRouter } from './http/registry';
+import { routes } from './routes';
 
-export interface AppDeps {
-  config: ApiConfig;
-  logger: Logger;
-  db: PrismaClient;
-  redis: Redis;
-}
-
-declare module 'express-serve-static-core' {
-  interface Request {
-    id: string;
-  }
-}
+export type { AppDeps };
 
 const REQUEST_ID = /^[A-Za-z0-9._-]{8,64}$/;
 const CHECK_TIMEOUT_MS = 2_000;
@@ -45,7 +38,8 @@ async function check(fn: () => Promise<unknown>): Promise<{ ok: boolean; latency
   }
 }
 
-export function createApp({ config, logger, db, redis }: AppDeps) {
+export function createApp(deps: AppDeps) {
+  const { config, logger, db, redis } = deps;
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', config.TRUST_PROXY);
@@ -121,6 +115,9 @@ export function createApp({ config, logger, db, redis }: AppDeps) {
     });
   });
 
+  // Console API (cookie sessions). Every route is declared in ./routes with its access scope.
+  app.use('/api', buildRouter(routes, deps, new RateLimiter(redis, logger, config.RATE_LIMITS === 'on')));
+
   app.use('/api', (req, _res, next) => next(new HttpError(404, 'NOT_FOUND', `No route for ${req.method} ${req.path}`)));
 
   // Serve the built SPA from the same origin, so session cookies stay first-party and no CORS is needed.
@@ -140,14 +137,16 @@ export function createApp({ config, logger, db, redis }: AppDeps) {
     let status = 500;
     let code = 'INTERNAL_ERROR';
     let message = 'Something went wrong on our side';
+    let details: unknown;
     if (err instanceof HttpError) ({ status, code, message } = err);
+    else if (err instanceof DomainError) ({ httpStatus: status, code, message, details } = err);
     else if (e.type === 'entity.too.large')
       [status, code, message] = [413, 'PAYLOAD_TOO_LARGE', 'Request body is too large'];
     else if (e.type === 'entity.parse.failed')
       [status, code, message] = [400, 'INVALID_JSON', 'Request body is not valid JSON'];
     else req.log.error({ err: e.stack }, 'unhandled error');
     // 5xx responses never include internals; the request id links the user's report to our logs.
-    res.status(status).json({ error: { code, message, requestId: req.id } });
+    res.status(status).json({ error: { code, message, ...(details ? { details } : {}), requestId: req.id } });
   };
   app.use(errorHandler);
   return app;

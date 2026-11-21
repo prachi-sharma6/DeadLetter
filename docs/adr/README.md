@@ -15,3 +15,4 @@ Status is `accepted` unless marked otherwise. Supersede an ADR with a new one ra
 | 0008 | [Toolchain and runtime choices](0008-toolchain.md)                          |
 | 0009 | [No-card hosting: Render + Supabase + Redis Cloud](0009-no-card-hosting.md) |
 | 0010 | [Data model and consistency rules](0010-data-model.md)                      |
+| 0011 | [Authentication, sessions and tenant isolation](0011-auth-and-tenancy.md)   |

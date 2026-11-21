@@ -22,6 +22,12 @@ export const apiEnvSchema = z.object({
   WEB_DIST_DIR: z.string().optional(),
   /** Also run the background worker inside the API process (for single-service free hosts). */
   RUN_WORKER: bool.default(false),
+  /** Resend API key. Without it, production reports email as "not configured" instead of pretending to send. */
+  RESEND_API_KEY: z.string().startsWith('re_', 'must be a Resend API key (re_…)').optional(),
+  /** Sender, e.g. `DeadLetter <noreply@your-domain.com>`; the domain must be verified in Resend. */
+  EMAIL_FROM: z.string().min(3).default('DeadLetter <onboarding@resend.dev>'),
+  /** Turn off only in tests that exercise many requests; production must keep rate limits on. */
+  RATE_LIMITS: z.enum(['on', 'off']).default('on'),
   /** Git commit of the running build, reported by /api/health. */
   GIT_SHA: z.string().default('dev'),
 });

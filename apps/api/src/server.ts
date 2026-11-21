@@ -11,6 +11,7 @@ import {
 import { startWorker, type RunningWorker } from '@deadletter/worker';
 import { createApp } from './app';
 import { loadApiConfig } from './config';
+import { createMailer } from './mailer';
 
 const config = loadApiConfig();
 const logger = createLogger({ service: 'api', level: config.LOG_LEVEL, pretty: config.LOG_PRETTY });
@@ -18,7 +19,14 @@ installCrashHandlers(logger);
 
 const db = createDb({ url: config.DATABASE_URL, poolMax: config.DATABASE_POOL_MAX, caCert: config.DATABASE_CA_CERT });
 const redis = createRedis({ url: config.REDIS_URL, name: 'api', logger, role: 'request' });
-const app = createApp({ config, logger, db, redis });
+const identity = {
+  db,
+  mailer: createMailer(config, logger),
+  appOrigin: config.APP_ORIGIN,
+  onEmailError: (err: unknown, purpose: string) =>
+    logger.error({ err: (err as Error).message, purpose }, 'email delivery failed'),
+};
+const app = createApp({ config, logger, db, redis, identity });
 
 const server = createServer(app);
 server.requestTimeout = 30_000;

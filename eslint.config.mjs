@@ -46,6 +46,10 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
+      // HTTP response bodies in tests are untyped JSON whose shape the assertions themselves verify.
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
     },
   },
   { files: ['**/*.{js,mjs,cjs}'], ...tseslint.configs.disableTypeChecked },

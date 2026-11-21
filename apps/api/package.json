@@ -9,11 +9,13 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "@deadletter/core": "0.1.0",
     "@deadletter/db": "0.1.0",
     "@deadletter/runtime": "0.1.0",
     "@deadletter/shared": "0.1.0",
     "@deadletter/worker": "0.1.0",
     "compression": "1.8.2",
+    "cookie": "1.1.1",
     "express": "5.3.0",
     "helmet": "8.3.0",
     "pino-http": "10.5.0",
