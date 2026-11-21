@@ -42,7 +42,7 @@ export function createApp(deps: AppDeps) {
   const { config, logger, db, redis } = deps;
   const app = express();
   app.disable('x-powered-by');
-  app.set('trust proxy', config.TRUST_PROXY);
+  app.set('trust proxy', config.TRUST_PROXY === 'private' ? 'loopback, linklocal, uniquelocal' : config.TRUST_PROXY);
 
   const requestId: RequestHandler = (req, res, next) => {
     const incoming = req.header('x-request-id');
@@ -91,6 +91,19 @@ export function createApp(deps: AppDeps) {
   app.use(express.json({ limit: '1mb' }));
 
   // Liveness: the process is up. Never touches dependencies, so a flaky Redis can't trigger restart loops.
+  // TEMPORARY diagnostic (remove after verifying client-IP detection on Render): shows the caller only its own
+  // forwarding headers and the IP the app derived from them.
+  app.get('/api/debug/client-ip', (req, res) => {
+    res.setHeader('cache-control', 'no-store');
+    res.json({
+      derivedIp: req.ip,
+      ips: req.ips,
+      xForwardedFor: req.get('x-forwarded-for') ?? null,
+      cfConnectingIp: req.get('cf-connecting-ip') ?? null,
+      trueClientIp: req.get('true-client-ip') ?? null,
+    });
+  });
+
   app.get('/api/health/live', (_req, res) => {
     res.json({ status: 'ok' });
   });

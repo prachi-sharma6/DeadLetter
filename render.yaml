@@ -15,8 +15,8 @@ services:
         value: production
       - key: LOG_LEVEL
         value: info
-      - key: TRUST_PROXY
-        value: '1'
+      - key: TRUST_PROXY # Render's proxy chain is internal (10.x); take the right-most public address
+        value: private
       - key: DATABASE_POOL_MAX
         value: '3'
       - key: DATABASE_URL

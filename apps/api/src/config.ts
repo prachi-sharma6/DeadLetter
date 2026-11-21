@@ -16,8 +16,14 @@ export const apiEnvSchema = z.object({
   REDIS_URL: z.url().refine((u) => /^rediss?:\/\//.test(u), 'must be a redis:// or rediss:// URL'),
   /** Public origin of the app, e.g. https://app.example.com. Used for CORS-free same-origin checks and links. */
   APP_ORIGIN: z.url(),
-  /** Number of reverse-proxy hops to trust for client IPs (Northflank/Cloudflare = 1). */
-  TRUST_PROXY: z.coerce.number().int().min(0).max(5).default(0),
+  /**
+   * How to find the client IP behind reverse proxies (used for rate limits, sessions and audit):
+   *  - `private`: trust only private/internal proxy addresses (10/8, 172.16/12, 192.168/16, loopback, link-local) and
+   *    take the right-most public address. Correct for hosts whose proxy chain is internal (Render), and a client
+   *    cannot spoof it: anything it puts in X-Forwarded-For ends up to the left of its real address.
+   *  - a number: trust exactly that many proxy hops. 0 = use the socket address (no proxy).
+   */
+  TRUST_PROXY: z.union([z.literal('private'), z.coerce.number().int().min(0).max(5)]).default(0),
   /** Directory of the built web app to serve; unset in development (Vite serves it). */
   WEB_DIST_DIR: z.string().optional(),
   /** Also run the background worker inside the API process (for single-service free hosts). */
