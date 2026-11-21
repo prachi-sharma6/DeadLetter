@@ -21,7 +21,7 @@ export default tseslint.config(
     languageOptions: {
       globals: { ...globals.node },
       parserOptions: {
-        projectService: { allowDefaultProject: ['vitest.config.ts'] },
+        projectService: { allowDefaultProject: ['vitest.config.ts', 'vitest.integration-setup.ts'] },
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -49,5 +49,6 @@ export default tseslint.config(
     },
   },
   { files: ['**/*.{js,mjs,cjs}'], ...tseslint.configs.disableTypeChecked },
+  { files: ['packages/db/scripts/**'], rules: { 'no-console': 'off' } },
   prettier,
 );

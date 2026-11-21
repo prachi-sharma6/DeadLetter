@@ -1,11 +1,26 @@
 {
   "files": [],
   "references": [
-    { "path": "packages/shared" },
-    { "path": "packages/runtime" },
-    { "path": "packages/db" },
-    { "path": "apps/api" },
-    { "path": "apps/worker" },
-    { "path": "apps/web" }
+    {
+      "path": "packages/shared"
+    },
+    {
+      "path": "packages/runtime"
+    },
+    {
+      "path": "packages/db"
+    },
+    {
+      "path": "packages/core"
+    },
+    {
+      "path": "apps/api"
+    },
+    {
+      "path": "apps/worker"
+    },
+    {
+      "path": "apps/web"
+    }
   ]
 }

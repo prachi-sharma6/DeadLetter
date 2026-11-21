@@ -1,7 +1,9 @@
 import os from 'node:os';
-import { pingDb, type PrismaClient } from '@deadletter/db';
-import { closeRedis, createRedis, type Logger } from '@deadletter/runtime';
+import { Queue } from 'bullmq';
+import { assertUtcSession, pingDb, type PrismaClient } from '@deadletter/db';
+import { BULL_PREFIX, JOBS_QUEUE, closeRedis, createRedis, type Logger } from '@deadletter/runtime';
 import { startHeartbeat } from './heartbeat';
+import { bullPublisher, startOutboxDispatcher } from './outbox-dispatcher';
 
 export interface WorkerDeps {
   db: PrismaClient;
@@ -21,19 +23,27 @@ export interface RunningWorker {
  * allow one service, inside the API process (RUN_WORKER=true). The worker owns its Redis connection because queue
  * connections must block and retry forever, unlike the API's fail-fast connection.
  *
- * Phase 0: heartbeat only. Job processing arrives in Phase 4.
+ * Phase 1: heartbeat + outbox dispatcher. Attempt processing arrives in Phase 4.
  */
 export async function startWorker({ db, redisUrl, logger, version }: WorkerDeps): Promise<RunningWorker> {
   const log = logger.child({ component: 'worker' });
   const workerId = `${os.hostname()}:${process.pid}`;
   const redis = createRedis({ url: redisUrl, name: 'worker', logger: log, role: 'queue' });
   await pingDb(db);
+  await assertUtcSession(db);
+
+  const queue = new Queue(JOBS_QUEUE, { connection: redis, prefix: BULL_PREFIX });
+  queue.on('error', (err) => log.warn({ err: err.message }, 'queue error'));
+  const dispatcher = startOutboxDispatcher({ db, publisher: bullPublisher(queue), logger: log });
   const heartbeat = startHeartbeat({ redis, workerId, logger: log });
   log.info({ workerId, version }, 'worker started');
+
   return {
     workerId,
     async stop() {
+      await dispatcher.stop();
       await heartbeat.stop();
+      await queue.close();
       await closeRedis(redis);
       log.info({ workerId }, 'worker stopped');
     },

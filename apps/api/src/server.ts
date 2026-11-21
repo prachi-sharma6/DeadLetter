@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { createDb } from '@deadletter/db';
+import { assertUtcSession, createDb } from '@deadletter/db';
 import {
   closeRedis,
   createLogger,
@@ -17,6 +17,7 @@ const logger = createLogger({ service: 'api', level: config.LOG_LEVEL, pretty: c
 installCrashHandlers(logger);
 
 const db = createDb({ url: config.DATABASE_URL, poolMax: config.DATABASE_POOL_MAX, caCert: config.DATABASE_CA_CERT });
+await assertUtcSession(db);
 const redis = createRedis({ url: config.REDIS_URL, name: 'api', logger, role: 'request' });
 const app = createApp({ config, logger, db, redis });
 

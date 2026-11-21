@@ -13,6 +13,9 @@
     },
     {
       "path": "../worker"
+    },
+    {
+      "path": "../../packages/core"
     }
   ]
 }

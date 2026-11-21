@@ -24,6 +24,7 @@ COPY apps/web/package.json apps/web/
 COPY packages/shared/package.json packages/shared/
 COPY packages/runtime/package.json packages/runtime/
 COPY packages/db/package.json packages/db/
+COPY packages/core/package.json packages/core/
 COPY packages/db/prisma packages/db/prisma
 RUN npm ci --ignore-scripts=false
 
@@ -58,10 +59,12 @@ CMD ["node", "--enable-source-maps", "apps/worker/dist/main.js"]
 
 # One-off job that applies database migrations before each release.
 FROM runtime AS migrate
-WORKDIR /app/packages/db
-CMD ["npx", "prisma", "migrate", "deploy"]
+CMD ["node", "packages/db/scripts/migrate.mjs"]
 
 # Single-service image: API + web app + in-process worker (docs/adr/0009).
 # Keep this stage LAST: Render builds the final stage and has no option to choose a target.
+# Free hosts have no separate release job, so pending migrations are applied before the server starts; if they fail the
+# container exits and the platform keeps the previous version running.
 FROM api AS all
 ENV RUN_WORKER=true
+CMD ["sh", "-c", "node packages/db/scripts/migrate.mjs && exec node --enable-source-maps apps/api/dist/server.js"]

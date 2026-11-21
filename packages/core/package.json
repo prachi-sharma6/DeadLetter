@@ -1,0 +1,14 @@
+{
+  "name": "@deadletter/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Server-side domain services shared by the API and worker (database-backed)",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@deadletter/db": "0.1.0",
+    "@deadletter/shared": "0.1.0"
+  }
+}

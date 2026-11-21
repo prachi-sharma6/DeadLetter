@@ -14,3 +14,4 @@ Status is `accepted` unless marked otherwise. Supersede an ADR with a new one ra
 | 0007 | [Organizations and teams in v1](0007-teams.md)                              |
 | 0008 | [Toolchain and runtime choices](0008-toolchain.md)                          |
 | 0009 | [No-card hosting: Render + Supabase + Redis Cloud](0009-no-card-hosting.md) |
+| 0010 | [Data model and consistency rules](0010-data-model.md)                      |
